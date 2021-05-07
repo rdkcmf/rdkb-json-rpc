@@ -28,7 +28,19 @@ add_library(json_hal_server SHARED ${SOURCES})
 set_target_properties(json_hal_server PROPERTIES PUBLIC_HEADER  "json_hal_server.h;json_hal_common.h")
 target_include_directories(json_hal_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/json-schema-validator-wrapper)
 target_compile_options(json_hal_server PRIVATE -Wall -Werror -Wno-error=discarded-qualifiers)
-target_compile_definitions(json_hal_server PUBLIC -DJSON_SCHEMA_VALIDATION_ENABLED -DJSON_BLOCKING_SUBSCRIBE_EVENT)
+
+# JSON_BLOCKING_SUBSCRIBE_EVENT
+if(JSON_BLOCKING_SUBSCRIBE_EVENT)
+target_compile_definitions(json_hal_server PUBLIC -DJSON_BLOCKING_SUBSCRIBE_EVENT)
+endif(JSON_BLOCKING_SUBSCRIBE_EVENT)
+unset(JSON_BLOCKING_SUBSCRIBE_EVENT)
+
+# Schema validation.
+if(JSON_SCHEMA_VALIDATION_ENABLED)
+target_compile_definitions(json_hal_server PUBLIC -DJSON_SCHEMA_VALIDATION_ENABLED)
+endif(JSON_SCHEMA_VALIDATION_ENABLED)
+unset(JSON_SCHEMA_VALIDATION_ENABLED)
+
 target_include_directories(json_hal_server PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/json-rpc-server
     ${CMAKE_CURRENT_SOURCE_DIR}/json-rpc-common/)

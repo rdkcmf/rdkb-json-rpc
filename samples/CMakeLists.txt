@@ -22,7 +22,11 @@ find_package(PkgConfig REQUIRED)
 
 #TEST - HAL Server test application
 add_executable(test_json_hal_srv  json_hal_server_test.c)
-target_compile_definitions(test_json_hal_srv PUBLIC -DJSON_SCHEMA_VALIDATION_ENABLED)
+
+if(JSON_SCHEMA_VALIDATION_ENABLED)
+target_compile_definitions(json_hal_server PUBLIC -DJSON_SCHEMA_VALIDATION_ENABLED)
+endif(JSON_SCHEMA_VALIDATION_ENABLED)
+unset(JSON_SCHEMA_VALIDATION_ENABLED)
 target_include_directories(test_json_hal_srv PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ ${CMAKE_CURRENT_SOURCE_DIR}/../json-rpc-common)
 
 target_link_libraries(test_json_hal_srv

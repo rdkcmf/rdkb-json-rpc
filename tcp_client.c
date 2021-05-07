@@ -202,7 +202,6 @@ static void *rpc_client_handler(void *paramPtr)
                         params->func_parse(params->sock, params->buffer, rc);
                     }
                 } // Got a reponse for something!
-                
             } else {
                 LOGERROR("sock desc is not set");
             }
