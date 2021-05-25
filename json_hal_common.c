@@ -258,7 +258,10 @@ int json_hal_load_config(const char *config_file, hal_config_t *config)
         LOGERROR("json file not found %s \n", config_file);
         return RETURN_ERR;
     }
-    fread(buffer, sizeof(buffer), 1, fp);
+    if (fread(buffer, sizeof(buffer), 1, fp) != 1)
+    {
+        // LOGERROR("Unexpected amount read from configuration file\n");
+    }
     fclose(fp);
 
     /**

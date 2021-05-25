@@ -48,7 +48,10 @@ int main(int argc, char**argv)
         buffer = (char *)malloc(length);
         if (buffer)
         {
-            fread(buffer, 1, length, f);
+            if (fread(buffer, 1, length, f) != length)
+            {
+                printf("Incomplete read from json sample file\n");
+            }
         }
         fclose(f);
     }

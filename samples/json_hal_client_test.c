@@ -114,7 +114,11 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    fread(buffer, sizeof(buffer), 1, fp);
+    if (fread(buffer, sizeof(buffer), 1, fp) != 1)
+    {
+        // printf("Incomplete read from json file\n");
+    }
+
     fclose(fp);
 
     /* create a json request from json file */
