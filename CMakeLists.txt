@@ -26,6 +26,7 @@ find_package(PkgConfig REQUIRED)
 set(SOURCES json_hal_server.c json_hal_common.c tcp_server.c)
 add_library(json_hal_server SHARED ${SOURCES})
 set_target_properties(json_hal_server PROPERTIES PUBLIC_HEADER  "json_hal_server.h;json_hal_common.h")
+set_target_properties(json_hal_server PROPERTIES VERSION 0 SOVERSION 0 )
 target_include_directories(json_hal_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/json-schema-validator-wrapper)
 target_compile_options(json_hal_server PRIVATE -Wall -Werror -Wno-error=discarded-qualifiers)
 
@@ -58,6 +59,7 @@ set(SOURCES json_hal_client.c json_hal_common.c tcp_client.c)
 add_library(json_hal_client SHARED ${SOURCES})
 target_compile_options(json_hal_client PRIVATE -Wall -Werror -Wno-error=discarded-qualifiers)
 set_target_properties(json_hal_client PROPERTIES PUBLIC_HEADER  "json_hal_client.h")
+set_target_properties(json_hal_client PROPERTIES VERSION 0 SOVERSION 0 )
 
 # JSON_BLOCKING_SUBSCRIBE_EVENT
 if(JSON_BLOCKING_SUBSCRIBE_EVENT)

@@ -23,6 +23,7 @@ set(SOURCES json_schema_validator_wrapper.cpp)
 
 add_library(json_schema_validator_wrapper SHARED ${SOURCES})
 set_target_properties(json_schema_validator_wrapper PROPERTIES PUBLIC_HEADER  "json_schema_validator_wrapper.h")
+set_target_properties(json_schema_validator_wrapper PROPERTIES VERSION 0 SOVERSION 0 )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 target_link_libraries(json_schema_validator_wrapper nlohmann_json_schema_validator)
 
