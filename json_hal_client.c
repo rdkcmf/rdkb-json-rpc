@@ -31,8 +31,8 @@
 #define json_tokener_get_parse_end(tok) ((tok)->char_offset)
 #endif
 
-//Ticker timeout for aprox. 5s (20 x 250ms)
-#define SEND_MSG_TICKER_TIMEOUT         20
+//Ticker timeout for aprox. 10s (40 x 250ms)
+#define SEND_MSG_TICKER_TIMEOUT         40
 
 
 /* global variable to keep connection state. */
