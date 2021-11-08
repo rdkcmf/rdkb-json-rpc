@@ -58,6 +58,13 @@ set(SOURCES json_hal_client.c json_hal_common.c tcp_client.c)
 add_library(json_hal_client SHARED ${SOURCES})
 target_compile_options(json_hal_client PRIVATE -Wall -Werror -Wno-error=discarded-qualifiers)
 set_target_properties(json_hal_client PROPERTIES PUBLIC_HEADER  "json_hal_client.h")
+
+# JSON_BLOCKING_SUBSCRIBE_EVENT
+if(JSON_BLOCKING_SUBSCRIBE_EVENT)
+target_compile_definitions(json_hal_client PUBLIC -DJSON_BLOCKING_SUBSCRIBE_EVENT)
+endif(JSON_BLOCKING_SUBSCRIBE_EVENT)
+unset(JSON_BLOCKING_SUBSCRIBE_EVENT)
+
 target_include_directories(json_hal_client PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/json-rpc-common)
 target_link_libraries(json_hal_client json-c pthread)

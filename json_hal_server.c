@@ -731,6 +731,7 @@ static int wait_publish_event_reply(const char *event_name)
     //in case of timeout
     if(waiting_event_reply && msg_timeout)
     {
+        LOGERROR("JSON Hal Server wait timed out\n");
         ret = RETURN_ERR;
     }
     
