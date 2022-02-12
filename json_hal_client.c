@@ -289,6 +289,26 @@ static json_object *create_json_reply_event_msg(const char *event_name, const ch
 }
 #endif //JSON_BLOCKING_SUBSCRIBE_EVENT
 
+static inline void get_token(json_tokener **pp_token)
+{
+    *pp_token = NULL;
+    int depth = JSON_TOKENER_DEFAULT_DEPTH;
+
+    *pp_token = json_tokener_new_ex(depth);
+    if (!(*pp_token))
+    {
+        LOGERROR("Unable to allocate json_tokener: %s", strerror(errno));
+        return;
+    }
+
+    json_tokener_set_flags(*pp_token, JSON_TOKENER_STRICT
+#ifdef JSON_TOKENER_ALLOW_TRAILING_CHARS
+        | JSON_TOKENER_ALLOW_TRAILING_CHARS
+#endif
+    );
+
+    return;
+}
 static int response_parse_cb(const int fd, const char *buffer, const int len)
 {
 
@@ -301,36 +321,49 @@ static int response_parse_cb(const int fd, const char *buffer, const int len)
     json_object *returnObj = NULL;
     int id = 0;
     const char *action_name = NULL;
-    int depth = JSON_TOKENER_DEFAULT_DEPTH;
     json_tokener* tok = NULL;
     json_object* jobj = NULL;
     const char *event_buf = NULL;
     int event_buf_len = 0;
+    int parse_end_expected = len;
+    char* aterr = "";
 
-    tok = json_tokener_new_ex(depth);
-    if (!tok)
+    get_token(&tok);
+    if (NULL == tok)
     {
-        LOGERROR("Unable to allocate json_tokener: %s", strerror(errno));
+        LOGERROR("Invalid token\n");
         return RETURN_ERR;
     }
-
-    json_tokener_set_flags(tok, JSON_TOKENER_STRICT
-#ifdef JSON_TOKENER_ALLOW_TRAILING_CHARS
-        | JSON_TOKENER_ALLOW_TRAILING_CHARS
-#endif
-    );
 
     int start_pos = 0;
     while (start_pos != len)
     {
-        jobj = json_tokener_parse_ex(tok, &buffer[start_pos], len - start_pos);
+        jobj = json_tokener_parse_ex(tok, &buffer[start_pos], parse_end_expected - start_pos);
         enum json_tokener_error jerr = json_tokener_get_error(tok);
         int parse_end = json_tokener_get_parse_end(tok);
-        if (jobj == NULL && jerr != json_tokener_continue)
+        aterr = (start_pos + parse_end < parse_end_expected)
+            ? &buffer[start_pos + parse_end]
+            : "";
+
+        /* If JSON messages glue together, need to parse multiple messages from one buffer */
+        if ((jobj == NULL) &&
+            (jerr == json_tokener_error_parse_unexpected) &&
+            (aterr[0]=='{'))
         {
-            char* aterr = (start_pos + parse_end < len)
-                ? &buffer[start_pos + parse_end]
-                : "";
+            parse_end_expected = parse_end;
+            LOGERROR("Continue to parse again from %d to %d with new token",
+                start_pos, parse_end_expected);
+            json_tokener_free(tok);
+            get_token(&tok);
+            if (NULL == tok)
+            {
+                LOGERROR("Invalid token\n");
+                return RETURN_ERR;
+            }
+            continue;
+        }
+        else if (jobj == NULL && jerr != json_tokener_continue)
+        {
             fflush(stdout);
             int fail_offset = start_pos + parse_end;
             LOGERROR("Failed at offset %d: %s %c\n", fail_offset, json_tokener_error_desc(jerr), aterr[0]);
@@ -462,6 +495,7 @@ static int response_parse_cb(const int fd, const char *buffer, const int len)
         } /* End of jobj != NULL */
 
         start_pos += json_tokener_get_parse_end(tok);
+        parse_end_expected = len;
         if (start_pos >= len)
         {
             json_tokener_free(tok);
