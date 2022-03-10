@@ -41,6 +41,11 @@ target_compile_definitions(json_hal_server PUBLIC -DJSON_SCHEMA_VALIDATION_ENABL
 endif(JSON_SCHEMA_VALIDATION_ENABLED)
 unset(JSON_SCHEMA_VALIDATION_ENABLED)
 
+if(JSON_TOKENER_ALLOW_TRAILING_CHARS)
+target_compile_definitions(json_hal_server PUBLIC -DJSON_TOKENER_ALLOW_TRAILING_CHARS)
+endif(JSON_TOKENER_ALLOW_TRAILING_CHARS)
+unset(JSON_TOKENER_ALLOW_TRAILING_CHARS)
+
 target_include_directories(json_hal_server PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/json-rpc-server
     ${CMAKE_CURRENT_SOURCE_DIR}/json-rpc-common/)
@@ -58,6 +63,12 @@ set(SOURCES json_hal_client.c json_hal_common.c tcp_client.c)
 add_library(json_hal_client SHARED ${SOURCES})
 target_compile_options(json_hal_client PRIVATE -Wall -Werror -Wno-error=discarded-qualifiers)
 set_target_properties(json_hal_client PROPERTIES PUBLIC_HEADER  "json_hal_client.h")
+
+if(JSON_TOKENER_ALLOW_TRAILING_CHARS)
+target_compile_definitions(json_hal_client PUBLIC -DJSON_TOKENER_ALLOW_TRAILING_CHARS)
+endif(JSON_TOKENER_ALLOW_TRAILING_CHARS)
+unset(JSON_TOKENER_ALLOW_TRAILING_CHARS)
+
 target_include_directories(json_hal_client PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/json-rpc-common)
 target_link_libraries(json_hal_client json-c pthread)

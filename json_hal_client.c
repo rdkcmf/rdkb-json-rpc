@@ -445,8 +445,8 @@ static int response_parse_cb(const int fd, const char *buffer, const int len)
                         if (rpc->sequence == id)
                         {
                             LL_DELETE(g_request_msg_tracking, rpc);
-                            memset(rpc->buffer, 0, len + 1);
-                            strncpy(rpc->buffer, buffer, len);
+                            memset(rpc->buffer, 0, parse_end + 1);
+                            strncpy(rpc->buffer, buffer + start_pos, parse_end);
                             rpc->rc = RETURN_OK;
                             rpc->len = len;
                             pthread_mutex_lock(&rpc->lock);
