@@ -585,6 +585,8 @@ int json_hal_client_send_and_get_reply(const json_object *jrequest_msg, json_obj
     else
     {
         LOGERROR("Failed to get reqId field from json request message \n");
+        free(rpc);
+        rpc = NULL;
         return RETURN_ERR;
     }
 
@@ -604,6 +606,10 @@ int json_hal_client_send_and_get_reply(const json_object *jrequest_msg, json_obj
     if (rc != RETURN_OK)
     {
         LOGERROR("Failed to send the request to server");
+        pthread_mutex_unlock(&rpc->lock);
+        pthread_mutex_destroy(&rpc->lock);
+        pthread_cond_destroy(&rpc->msg_rcvd);
+        request_delete_cb(request_msg_req_id);
         free(rpc);
         rpc = NULL;
         return RETURN_ERR;
