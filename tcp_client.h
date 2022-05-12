@@ -32,6 +32,7 @@
 
 #define SERVER_HOST "127.0.0.1"
 #define INVALID_SOCKFD -1
+#define LOOP_TIMEOUT 250000 // timeout in microseconds.
 
 /**
  * @brief Structure to hold the client socket connection.

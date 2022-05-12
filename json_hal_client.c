@@ -164,6 +164,24 @@ static unsigned int get_req_id();
  */
 static json_object *create_event_subscription_message(const char *event_dml_path, const char *event_notification_type);
 
+
+/**
+ * @brief Send the request message to the server socket, sync the response
+ * from server and return back the filled data to caller.
+ *
+ * This API will send the requested message to the server and wait for the
+ * response from the server. This API is blocked  until we get a proper
+ * response from the server or timed out happened.
+ *
+ * @param (IN)  Json object pointing to the request
+ * @param (IN)  the message timeout tick
+ * @param (OUT) Json object stores the response message
+ * @return RETURN_OK if message has been send to server and get response from server
+ * @note This is a blocking call, and will unblock if client get response from server or
+ * timeout happened because no data received from server.
+ */
+static int client_send_and_get_reply(const json_object *jrequest_msg, int tick_timeout, json_object **reply_msg);
+
 int json_hal_client_init(const char *hal_conf_path)
 {
     POINTER_ASSERT(hal_conf_path != NULL);
@@ -562,7 +580,48 @@ static int request_delete_cb(const int sequence)
  * Internally it maintains a mutex lock and send the data to server. This mutex
  * lock unlocked once we get response from server or when the timeout period expired.
  */
+int json_hal_client_send_and_get_reply_with_timeout(const json_object *jrequest_msg, int timeout, json_object **reply_msg)
+{
+	int tick = (timeout*1000000)/LOOP_TIMEOUT;
+	if(tick < SEND_MSG_TICKER_TIMEOUT)
+	{
+		tick = SEND_MSG_TICKER_TIMEOUT;
+	}
+	else if(tick > 480 )/*120s*/
+	{
+		tick = 480;
+	}
+	return client_send_and_get_reply(jrequest_msg,tick,reply_msg);
+}
+
+/**
+ * Send the request message to the server socket, sync the response
+ * from server and return back with the filled data to caller.
+ *
+ * This API will send the requested message to the server and wait for the
+ * response from the server. This API is blocked  until we get a proper
+ * response from the server or timed out happened.
+ *
+ * Internally it maintains a mutex lock and send the data to server. This mutex
+ * lock unlocked once we get response from server or when the default timeout period expired.
+ */
 int json_hal_client_send_and_get_reply(const json_object *jrequest_msg, json_object **reply_msg)
+{
+	return client_send_and_get_reply(jrequest_msg,SEND_MSG_TICKER_TIMEOUT,reply_msg);
+}
+
+/**
+ * Send the request message to the server socket, sync the response
+ * from server and return back with the filled data to caller.
+ *
+ * This API will send the requested message to the server and wait for the
+ * response from the server. This API is blocked  until we get a proper
+ * response from the server or timed out happened.
+ *
+ * Internally it maintains a mutex lock and send the data to server. This mutex
+ * lock unlocked once we get response from server or when the timeout period expired.
+ */
+static int client_send_and_get_reply(const json_object *jrequest_msg, int tick_timeout, json_object **reply_msg)
 {
     POINTER_ASSERT(jrequest_msg != NULL);
 
@@ -597,7 +656,7 @@ int json_hal_client_send_and_get_reply(const json_object *jrequest_msg, json_obj
     rpc->sequence = request_msg_req_id;
 
     //Timeout period.
-    rpc->ticker = SEND_MSG_TICKER_TIMEOUT;
+    rpc->ticker = tick_timeout;
     rpc->rc = RETURN_ERR;
 
     LL_APPEND(g_request_msg_tracking, rpc);

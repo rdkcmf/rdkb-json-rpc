@@ -33,7 +33,6 @@
 #include "tcp_client.h"
 #include <sys/time.h>
 
-#define LOOP_TIMEOUT 250000 // timeout in microseconds.
 
 /**
  * Enum to handle different states of connection thread.

@@ -78,6 +78,22 @@ int json_hal_client_run ();
 int json_hal_client_send_and_get_reply(const json_object *request, json_object** reply);
 
 /**
+ * @brief Send the request message to the server socket, sync the response
+ * from server and return back the filled data to caller.
+ *
+ * This API will send the requested message to the server and wait for the
+ * response from the server. This API is blocked  until we get a proper
+ * response from the server or timed out happened.
+ *
+ * @param (IN)  Json object pointing to the request
+ * @param (IN)  the timeout period in second.
+ * @param (OUT) Json object stores the response message
+ * @return RETURN_OK if message has been send to server and get response from server
+ * @note This is a blocking call, and will unblock if client get response from server or
+ * timeout happened because no data received from server.
+ */
+int json_hal_client_send_and_get_reply_with_timeout(const json_object *jrequest_msg, int timeout, json_object **reply_msg);
+/**
  * @brief Create and return the header json message to the caller.
  * Header contains module, version, action and seqid.
  * @param action_name
